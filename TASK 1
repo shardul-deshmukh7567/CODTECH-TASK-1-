@@ -1,0 +1,145 @@
+import tkinter as tk
+from tkinter import messagebox, simpledialog
+
+class LibraryItem:
+    def __init__(self, title, category, author):
+        self.title = title
+        self.category = category
+        self.author = author
+        self.checked_out = False
+
+    def check_out(self):
+        if not self.checked_out:
+            self.checked_out = True
+            return True
+        return False
+
+    def return_item(self):
+        if self.checked_out:
+            self.checked_out = False
+            return True
+        return False
+
+    def is_checked_out(self):
+        return self.checked_out
+
+
+class Book(LibraryItem):
+    def __init__(self, title, author):
+        super().__init__(title, "Book", author)
+
+
+class Magazine(LibraryItem):
+    def __init__(self, title, author):
+        super().__init__(title, "Magazine", author)
+
+
+class DVD(LibraryItem):
+    def __init__(self, title, author):
+        super().__init__(title, "DVD", author)
+
+
+class Library:
+    def __init__(self):
+        self.items = []
+        self.fine_per_day = 1.0  
+
+    def add_item(self, item):
+        self.items.append(item)
+
+    def checkout_item(self, title):
+        for item in self.items:
+            if item.title == title and item.check_out():
+                return f"You have checked out: {item.title}"
+        return "Item not available or already checked out."
+
+    def return_item(self, title, days_overdue=0):
+        for item in self.items:
+            if item.title == title and item.return_item():
+                fine = days_overdue * self.fine_per_day
+                return f"You have returned: {item.title}. Fine: ${fine:.2f}"
+        return "Item not found or was not checked out."
+
+    def search_items(self, query):
+        results = [item for item in self.items if query.lower() in item.title.lower() or
+                   query.lower() in item.author.lower()]
+        return results if results else "No items found."
+
+    def list_items(self):
+        return [(item.title, item.category, item.author, "Checked Out" if item.is_checked_out() else "Available") for item in self.items]
+
+
+class LibraryApp:
+    def __init__(self, master):
+        self.master = master
+        self.master.title("Library Management System")
+
+        self.library = Library()
+
+        self.label = tk.Label(master, text="Library Management System", font=("Arial", 16))
+        self.label.pack(pady=10)
+
+        self.add_button = tk.Button(master, text="Add Item", command=self.add_item)
+        self.add_button.pack(pady=5)
+
+        self.checkout_button = tk.Button(master, text="Check Out Item", command=self.checkout_item)
+        self.checkout_button.pack(pady=5)
+
+        self.return_button = tk.Button(master, text="Return Item", command=self.return_item)
+        self.return_button.pack(pady=5)
+
+        self.search_button = tk.Button(master, text="Search Item", command=self.search_item)
+        self.search_button.pack(pady=5)
+
+        self.list_button = tk.Button(master, text="List Items", command=self.list_items)
+        self.list_button.pack(pady=5)
+
+    def add_item(self):
+        title = simpledialog.askstring("Input", "Enter item title:")
+        author = simpledialog.askstring("Input", "Enter item author:")
+        category = simpledialog.askstring("Input", "Enter item category (Book/Magazine/DVD):")
+        
+        if category.lower() == "book":
+            item = Book(title, author)
+        elif category.lower() == "magazine":
+            item = Magazine(title, author)
+        elif category.lower() == "dvd":
+            item = DVD(title, author)
+        else:
+            messagebox.showerror("Error", "Invalid category!")
+            return
+
+        self.library.add_item(item)
+        messagebox.showinfo("Success", f"Added {category}: {title}")
+
+    def checkout_item(self):
+        title = simpledialog.askstring("Input", "Enter title of the item to check out:")
+        message = self.library.checkout_item(title)
+        messagebox.showinfo("Check Out", message)
+
+    def return_item(self):
+        title = simpledialog.askstring("Input", "Enter title of the item to return:")
+        days_overdue = simpledialog.askinteger("Input", "Enter days overdue (if any):", minvalue=0)
+        message = self.library.return_item(title, days_overdue)
+        messagebox.showinfo("Return Item", message)
+
+    def search_item(self):
+        query = simpledialog.askstring("Input", "Enter title or author to search:")
+        results = self.library.search_items(query)
+        
+        if isinstance(results, list):
+            result_string = "\n".join([f"{item.title} ({item.category}) by {item.author}" for item in results])
+            messagebox.showinfo("Search Results", result_string if result_string else "No items found.")
+        else:
+            messagebox.showinfo("Search Results", results)
+
+    def list_items(self):
+        items = self.library.list_items()
+        result_string = "\n".join([f"{item[0]} ({item[1]}) by {item[2]} - {item[3]}" for item in items])
+        messagebox.showinfo("Library Inventory", result_string if result_string else "No items in the library.")
+
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = LibraryApp(root)
+    root.mainloop()
