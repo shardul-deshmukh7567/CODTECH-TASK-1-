@@ -2,7 +2,7 @@ NAME - SHARDUL SANJAY DESHMUKH
 COMPANY - CODTECH IT SOLUTIONS 
 Domain - Python Programming 
 Duration - SEPTEMBER 25th ,2024 TO OCTOBER 25th 
-Mentor -
+Mentor - SANTOSH SIR 
 
 
 ******Overview of Project******
